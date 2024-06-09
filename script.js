@@ -93,12 +93,16 @@ async function justOne() {
 async function main() {
   console.log("Starting main function...");
   const topStories = await fetchTopStories();
-
+  let totalStories = 0;
+  let totalComments = 0;
+  const counter = document.getElementById('counter');
   for (const storyId of topStories) {
     const story = await fetchStoryDetails(storyId);
 
     if (story && story.kids) {
+      totalStories++;
       const comments = await fetchComments(story.kids);
+      totalComments += comments.length;
       //const filteredComments = comments.filter(comment => comment && comment.text && containsYouTubeLink(comment.text) && comment.score > 10);
       const filteredComments = comments.filter(comment => comment && comment.text && containsYouTubeLink(comment.text));
       //const filteredComments = comments;
@@ -108,6 +112,7 @@ async function main() {
         displayComments(filteredComments);
       }
     }
+		counter.textContent = `Searched ${totalStories} stories and ${totalComments} comments.`;
   }
   console.log("Main function completed.");
 }
