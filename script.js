@@ -1,5 +1,22 @@
 let currentPage = 0;
 const storiesPerPage = 100; // Change this value as needed
+let paused = false;
+let lastProcessedStoryIndex = 0;
+let totalStories = 0;
+let totalComments = 0;
+
+document.getElementById('pauseButton').addEventListener('click', () => {
+  paused = true;
+  document.getElementById('pauseButton').style.display = 'none';
+  document.getElementById('continueButton').style.display = 'inline-block';
+});
+
+document.getElementById('continueButton').addEventListener('click', () => {
+  paused = false;
+  document.getElementById('pauseButton').style.display = 'inline-block';
+  document.getElementById('continueButton').style.display = 'none';
+  main();
+});
 
 async function fetchTopStories(startIndex) {
   console.log("Fetching top stories...");
@@ -92,8 +109,6 @@ async function justOne() {
 }
 async function main() {
   console.log("Starting main function...");
-  let totalStories = 0;
-  let totalComments = 0;
 
   document.getElementById('prevPage').addEventListener('click', async () => {
     if (currentPage > 0) {
@@ -113,7 +128,13 @@ async function main() {
     document.getElementById('prevPage').disabled = currentPage === 0;
     //document.getElementById('nextPage').disabled = (currentPage + 1) * storiesPerPage >= totalStories;
 
-    for (const storyId of topStories) {
+    for (let i = lastProcessedStoryIndex; i < topStories.length; i++) {
+      console.log(i);
+      if (paused) {
+        lastProcessedStoryIndex = i;
+        return; // Pause fetching if paused
+      }
+      const storyId = topStories[i];
       const story = await fetchStoryDetails(storyId);
 
       if (story && story.kids) {
