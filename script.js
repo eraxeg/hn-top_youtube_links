@@ -83,8 +83,8 @@ function displayComments(story, comments) {
     const youTubeLinks = extractYouTubeLinks(comment.text);
 
     commentElement.innerHTML = `
+			<hr>
       <p>${comment.text}</p>
-      <p>Upvotes: ${comment.score}</p>
       <p>Posted by: ${comment.by}</p>
       <p>Time: ${new Date(comment.time * 1000).toLocaleString()}</p>
     `;
