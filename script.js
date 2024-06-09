@@ -47,45 +47,34 @@ function extractYouTubeLinks(text) {
   const youtubeRegex = /<a href="(https?:\/\/)?(www\.)?(m\.)?(youtube\.com|youtu\.be).*/g;
   return text.match(youtubeRegex);
 }
-
 function displayComments(story, comments) {
   const commentsContainer = document.getElementById('comments');
-  //commentsContainer.innerHTML = '';
-  const storyElement = document.createElement('div');
-  storyElement.innerHTML = `
-		<h2><a href="${story.url}" target="_blank">${story.title}</a></h2>
+
+  const storyDetails = document.createElement('details');
+  storyDetails.innerHTML = `
+    <summary><a href="${story.url}" target="_blank">${story.title}</a></summary>
     <p>Author: ${story.by}</p>
     <p>Score: ${story.score}</p>
     <p>Number of Comments: ${story.descendants}</p>
     <p>Time: ${new Date(story.time * 1000).toLocaleString()}</p>
-    <hr>
   `;
-  commentsContainer.appendChild(storyElement);
+  commentsContainer.appendChild(storyDetails);
+
   comments.forEach(comment => {
     const commentElement = document.createElement('div');
     const youTubeLinks = extractYouTubeLinks(comment.text);
 
     commentElement.innerHTML = `
       <p>${comment.text}</p>
+      <p>Upvotes: ${comment.score}</p>
       <p>Posted by: ${comment.by}</p>
       <p>Time: ${new Date(comment.time * 1000).toLocaleString()}</p>
-      <hr>
+      <div> 
+        ${youTubeLinks ? youTubeLinks.map(link => `<a href="${link}" target="_blank">${link}</a>`).join('<br>') : ''}
+      </div>
     `;
-    commentsContainer.appendChild(commentElement);
+    storyDetails.appendChild(commentElement);
   });
-}
-async function fetchCommentsForStory(storyId) {
-  console.log(`Fetching comments for story ID: ${storyId}`);
-  const response = await fetch(`https://hacker-news.firebaseio.com/v0/item/${storyId}.json`);
-  const story = await response.json();
-  console.log("Story details:", story);
-  if (story && story.kids) {
-    const comments = await fetchComments(story.kids);
-    return comments;
-  } else {
-    console.log("No comments found for story ID:", storyId);
-    return [];
-  }
 }
 
 async function justOne() {
