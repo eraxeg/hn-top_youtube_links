@@ -35,7 +35,7 @@ function containsYouTubeLink(text) {
     return String.fromCharCode(parseInt(hex, 16));
   });
   console.log(text);
-  const youtubeRegex = /<a href="https?:\/\/youtu\.be\/([a-zA-Z0-9_-]+)\?si=[a-zA-Z0-9_-]+/g;
+  const youtubeRegex = /<a href="(https?:\/\/)?(www\.)?(m\.)?(youtube\.com|youtu\.be).*/g;
   return youtubeRegex.test(text);
 }
 
@@ -44,14 +44,23 @@ function extractYouTubeLinks(text) {
   text = text.replace(/&#x([0-9a-fA-F]+);/g, function(match, hex) {
     return String.fromCharCode(parseInt(hex, 16));
   });
-  const youtubeRegex = /<a href="https?:\/\/youtu\.be\/([a-zA-Z0-9_-]+)\?si=[a-zA-Z0-9_-]+/g;
+  const youtubeRegex = /<a href="(https?:\/\/)?(www\.)?(m\.)?(youtube\.com|youtu\.be).*/g;
   return text.match(youtubeRegex);
 }
 
-function displayComments(comments) {
+function displayComments(story, comments) {
   const commentsContainer = document.getElementById('comments');
-  commentsContainer.innerHTML = '';
-
+  //commentsContainer.innerHTML = '';
+  const storyElement = document.createElement('div');
+  storyElement.innerHTML = `
+		<h2><a href="${story.url}" target="_blank">${story.title}</a></h2>
+    <p>Author: ${story.by}</p>
+    <p>Score: ${story.score}</p>
+    <p>Number of Comments: ${story.descendants}</p>
+    <p>Time: ${new Date(story.time * 1000).toLocaleString()}</p>
+    <hr>
+  `;
+  commentsContainer.appendChild(storyElement);
   comments.forEach(comment => {
     const commentElement = document.createElement('div');
     const youTubeLinks = extractYouTubeLinks(comment.text);
@@ -127,7 +136,7 @@ async function main() {
 
         console.log("Filtered comments:", filteredComments);
         if (filteredComments.length > 0) {
-          displayComments(filteredComments);
+          displayComments(story, filteredComments);
         }
       }
     const counter = document.getElementById('counter');
