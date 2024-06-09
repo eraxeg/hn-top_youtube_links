@@ -66,7 +66,7 @@ function extractYouTubeLinks(text) {
 }
 function displayComments(story, comments) {
   const commentsContainer = document.getElementById('comments');
-
+	const storyParagraph = document.createElement('p')
   const storyDetails = document.createElement('details');
   storyDetails.innerHTML = `
     <summary><a href="${story.url}" target="_blank">${story.title}</a></summary>
@@ -75,7 +75,8 @@ function displayComments(story, comments) {
     <p>Number of Comments: ${story.descendants}</p>
     <p>Time: ${new Date(story.time * 1000).toLocaleString()}</p>
   `;
-  commentsContainer.appendChild(storyDetails);
+  storyParagraph.appendChild(storyDetails);
+  commentsContainer.appendChild(storyParagraph);
 
   comments.forEach(comment => {
     const commentElement = document.createElement('div');
@@ -86,9 +87,6 @@ function displayComments(story, comments) {
       <p>Upvotes: ${comment.score}</p>
       <p>Posted by: ${comment.by}</p>
       <p>Time: ${new Date(comment.time * 1000).toLocaleString()}</p>
-      <div> 
-        ${youTubeLinks ? youTubeLinks.map(link => `<a href="${link}" target="_blank">${link}</a>`).join('<br>') : ''}
-      </div>
     `;
     storyDetails.appendChild(commentElement);
   });
