@@ -1,9 +1,14 @@
-async function fetchTopStories() {
+let currentPage = 0;
+const storiesPerPage = 100; // Change this value as needed
+
+async function fetchTopStories(startIndex) {
   console.log("Fetching top stories...");
   const response = await fetch('https://hacker-news.firebaseio.com/v0/topstories.json');
   const storyIds = await response.json();
-  console.log("Top stories fetched:", storyIds.slice(0, 200));
-  return storyIds.slice(0, 200);  // Fetch top 30 stories for example
+	const endIndex = Math.min(startIndex + storiesPerPage, storyIds.length);
+	const selectedStories = storyIds.slice(startIndex, endIndex);
+	console.log("Top stories fetched:", selectedStories);
+	return selectedStories;
 }
 
 async function fetchStoryDetails(storyId) {
@@ -86,36 +91,53 @@ async function justOne() {
   } else {
     console.log("No comments match the criteria.");
   }
-
-  console.log("Main function completed.");
 }
-
 async function main() {
   console.log("Starting main function...");
-  const topStories = await fetchTopStories();
   let totalStories = 0;
   let totalComments = 0;
-  const counter = document.getElementById('counter');
-  for (const storyId of topStories) {
-    const story = await fetchStoryDetails(storyId);
 
-    if (story && story.kids) {
-      totalStories++;
-      const comments = await fetchComments(story.kids);
-      totalComments += comments.length;
-      //const filteredComments = comments.filter(comment => comment && comment.text && containsYouTubeLink(comment.text) && comment.score > 10);
-      const filteredComments = comments.filter(comment => comment && comment.text && containsYouTubeLink(comment.text));
-      //const filteredComments = comments;
-
-      console.log("Filtered comments:", filteredComments);
-      if (filteredComments.length > 0) {
-        displayComments(filteredComments);
-      }
+  document.getElementById('prevPage').addEventListener('click', async () => {
+    if (currentPage > 0) {
+      currentPage--;
+      await loadStories(currentPage * storiesPerPage);
     }
-		counter.textContent = `Searched ${totalStories} stories and ${totalComments} comments.`;
+  });
+
+  document.getElementById('nextPage').addEventListener('click', async () => {
+    currentPage++;
+    await loadStories(currentPage * storiesPerPage);
+  });
+
+  async function loadStories(startIndex) {
+    const topStories = await fetchTopStories(startIndex);
+
+    document.getElementById('prevPage').disabled = currentPage === 0;
+    //document.getElementById('nextPage').disabled = (currentPage + 1) * storiesPerPage >= totalStories;
+
+    for (const storyId of topStories) {
+      const story = await fetchStoryDetails(storyId);
+
+      if (story && story.kids) {
+        totalStories++;
+        const comments = await fetchComments(story.kids);
+        totalComments += comments.length;
+
+        const filteredComments = comments.filter(comment => comment && comment.text && containsYouTubeLink(comment.text));
+
+        console.log("Filtered comments:", filteredComments);
+        if (filteredComments.length > 0) {
+          displayComments(filteredComments);
+        }
+      }
+    const counter = document.getElementById('counter');
+    counter.textContent = `Searched ${totalStories} stories and ${totalComments} comments.`;
+    }
+
+    console.log("Main function completed.");
   }
-  console.log("Main function completed.");
+
+  await loadStories(0);
 }
 
 main();
-
