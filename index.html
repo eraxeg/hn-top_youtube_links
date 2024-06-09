@@ -7,12 +7,59 @@
 </head>
 <body>
   <h1>Hacker News Comments with YouTube Links</h1>
+	<p>
   <div id="comments"></div>
+	</p>
+	<p>
   <div id="counter">Searching...</div>
+	<span id="trafficCounter">0</span>
+	</p>
+	<p>
   <button id="prevPage" disabled>Previous Page</button>
 	<button id="nextPage">Next Page</button>
   <button id="pauseButton">Pause</button>
   <button id="continueButton" style="display: none;">Continue</button>
+	</p>
+    <script>
+        // Variable to store total network traffic
+        var totalTraffic = 0;
+
+        // Function to log network traffic and update display
+        function logNetworkTraffic(traffic) {
+            totalTraffic += traffic;
+            var trafficKB = totalTraffic / 1024; // Convert to kilobytes
+            document.getElementById('trafficCounter').textContent = trafficKB.toFixed(2) + " KB";
+        }
+
+        // Intercept XMLHttpRequest
+        var xhrOpen = XMLHttpRequest.prototype.open;
+        XMLHttpRequest.prototype.open = function(method, url) {
+            this._url = url;
+            return xhrOpen.apply(this, arguments);
+        };
+
+        var xhrSend = XMLHttpRequest.prototype.send;
+        XMLHttpRequest.prototype.send = function() {
+            this.addEventListener('load', function() {
+                var responseSize = this.response ? this.response.length : 0;
+                logNetworkTraffic(responseSize);
+            });
+            return xhrSend.apply(this, arguments);
+        };
+
+        // Intercept fetch API
+        var fetchFunc = window.fetch;
+        window.fetch = function() {
+            var url = arguments[0];
+            return fetchFunc.apply(this, arguments).then(function(response) {
+                response.clone().text().then(function(responseText) {
+                    logNetworkTraffic(responseText.length);
+                });
+                return response;
+            });
+        };
+
+    </script>
   <script src="script.js"></script>
 </body>
 </html>
