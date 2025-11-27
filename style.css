@@ -9,7 +9,7 @@ body {
 	background-color: #f3f3f3;
 }
 
-details[open] {
+details {
 	background-color: white;
 	padding: 0.5em;
 }
