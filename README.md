@@ -1,6 +1,6 @@
 # Hacker News Top Comments with YouTube Links
 
-(eraxeg.github.io/hn-top_youtube_links)[https://eraxeg.github.io/hn-top_youtube_links/]
+Try it: https://eraxeg.github.io/hn-top_youtube_links/
 
 Created with ChatGPT.
 
